@@ -59,7 +59,7 @@ class GSStateMachine:
 
             # Open the container
             with self.sm_uavs:
-                for i in range (1,n_uavs+1):
+                for i in range (1,n_uavs):
                     smach.Concurrence.add('UAV{}_STATE'.format(i), UavState(i))
             
             smach.StateMachine.add('CON', self.sm_uavs,
