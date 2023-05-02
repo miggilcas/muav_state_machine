@@ -1,0 +1,15 @@
+<launch>
+
+    <arg name="uav_id" default="3"/>
+    <arg name="autopilot" default="px4"/>
+
+    <node name="muav_state_machine" output="screen" pkg="muav_state_machine" type="muav_state_machine_node.py" >
+        <param name="uav_id" value="$(arg uav_id)" />
+        <param name="autopilot" value="$(arg autopilot)" />
+    
+    
+    </node>
+    
+    
+
+</launch>

@@ -1,0 +1,4 @@
+string autopilot
+string mission_state
+uint8 wp_reached
+mavros_msgs/ExtendedState extended_state
