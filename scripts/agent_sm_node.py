@@ -32,9 +32,13 @@ class MUAVStateMachine:
         autopilot = rospy.get_param("/agent_sm_node/autopilot")
 
         #Setting the parameters for eassy access to GS_sm_node
-        rospy.set_param("/uav_{}_sm/autopilot".format(uav_id),autopilot)
-        rospy.set_param("/uav_{}_sm/mission_state".format(uav_id),"idle")
-
+        #rospy.set_param("/uav_{}_sm/autopilot".format(uav_id),autopilot)
+        #rospy.set_param("/uav_{}_sm/mission_state".format(uav_id),"idle")
+        autopilot_pub = rospy.Publisher("/uav_{}_sm/com/autopilot".format(uav_id), String, queue_size=10)
+        autopilot_pub.publish(autopilot)
+        mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(uav_id), String, queue_size=10)
+        mission_state_pub.publish("idle")
+        
         #MonitorMavrosState_topic_cb = lambda ud, msg: msg.armed  # callback function to monitor the topic '/mavros/state'
         # def MonitorMavrosState_topic_cb(ud, msg):
         #     ud.armed = msg.armed

@@ -24,8 +24,10 @@ class UavState(smach.State):
         while not rospy.is_shutdown():           
             # TBD: error detection if not namespaces with the name of the uav_id 
             # catching the parameters from the agent state machine node
-            autopilot = rospy.get_param("/uav_{}_sm/autopilot".format(self.uav_id))
-            mission_state = rospy.get_param("/uav_{}_sm/mission_state".format(self.uav_id))
+            #autopilot = rospy.get_param("/uav_{}_sm/autopilot".format(self.uav_id)) # it doesn't work because it cannot be seen by multimaster
+            #mission_state = rospy.get_param("/uav_{}_sm/mission_state".format(self.uav_id))
+            autopilot = rospy.wait_for_message("/uav_{}_sm/com/autopilot".format(self.uav_id), String) #parameter
+            mission_state = rospy.wait_for_message("/uav_{}_sm/com/mission_state".format(self.uav_id), String) #published by the agent state machine
             # catching the data from the agent state machine node
             #mission_state = rospy.wait_for_message("/uav_{}_sm/com/mission_state".format(self.uav_id), String)
             wp_reached = rospy.wait_for_message("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8)
