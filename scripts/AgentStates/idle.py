@@ -20,7 +20,7 @@ class Idle(smach.State):
                 rospy.loginfo(CBLUE2 +'There are %d connections to the topic of PX4'+CEND, self.pub.get_num_connections())# Modify
             if self.autopilot == "dji":
                 rospy.loginfo(CBLUE2 +'There are %d connections to the topic of DJI'+CEND, self.pub.get_num_connections())
-            if self.pub.get_num_connections() >= 1:
+            if self.pub.get_num_connections() > 1:
                 return 'gcs_connection'
             rospy.sleep(2)
         return 'shutdown'
