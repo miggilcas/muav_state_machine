@@ -1,6 +1,6 @@
 <launch>
 
-    <arg name="uav_id" default="3"/>
+    <arg name="uav_id" default="1"/>
     <arg name="autopilot" default="px4"/>
 
     <node name="agent_sm_node" output="screen" pkg="muav_state_machine" type="agent_sm_node.py" >
