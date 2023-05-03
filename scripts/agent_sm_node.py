@@ -68,7 +68,7 @@ class MUAVStateMachine:
         # Open the container
         with self.sm:
             # # Add states to the container
-            smach.StateMachine.add('IDLE', Idle(pub,autopilot),
+            smach.StateMachine.add('IDLE', Idle(pub,autopilot,uav_id),
                     transitions={'gcs_connection' : 'GCSCONNECTION',
                                  'shutdown'  : 'shutdown'})
                      

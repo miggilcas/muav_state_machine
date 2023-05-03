@@ -6,11 +6,12 @@ from PrintColours import *
 from std_msgs.msg import String
 
 class Idle(smach.State):
-    def __init__(self,pub,autopilot):#modify, common_data
+    def __init__(self,pub,autopilot,uav_id):#modify, common_data
         smach.State.__init__(
             self, outcomes=['gcs_connection', 'shutdown'])
         self.pub = pub
         self.autopilot = autopilot
+        self.uav_id = uav_id
 
     def execute(self, ud):
         rospy.loginfo('[Idle] - Idle state')
