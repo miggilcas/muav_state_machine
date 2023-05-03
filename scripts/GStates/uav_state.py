@@ -33,6 +33,8 @@ class UavState(smach.State):
             wp_reached = rospy.wait_for_message("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8)
             extended_state = rospy.wait_for_message("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState)
 
+            rospy.loginfo('[UavState] - UAV{} state: autopilot: {}, mission_state: {}, wp_reached: {}, extended_state: {}'.format(self.uav_id,autopilot,mission_state,wp_reached,extended_state))
+            
             #fill the UAVState_msg custom message
             UAVState_msg.autopilot = autopilot #parameter
             UAVState_msg.mission_state = mission_state#published by the agent state machine
