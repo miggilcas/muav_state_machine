@@ -39,6 +39,13 @@ class UavState(smach.State):
         mission_state_sub = rospy.Subscriber("/uav_{}_sm/com/mission_state".format(self.uav_id), String, mission_state_cb)
         wp_reached_sub = rospy.Subscriber("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8, wp_reached_cb)
         extended_state_sub = rospy.Subscriber("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState, estate_cb)
+        
+        # UAVState_msg initialization
+        UAVState_msg.autopilot = "px4"
+        UAVState_msg.mission_state = "idle"
+        UAVState_msg.wp_reached = 0
+        UAVState_msg.extended_state.vtol_state = 0
+        UAVState_msg.extended_state.landed_state = 0
         # transition to X state
         while not rospy.is_shutdown():           
             # TBD: error detection if not namespaces with the name of the uav_id 
@@ -53,14 +60,16 @@ class UavState(smach.State):
             rospy.loginfo('[UavState] - UAV{} state: autopilot: {}, mission_state: {}, wp_reached: {}, extended_state: {}'.format(self.uav_id,autopilot,mission_state,wp_reached,extended_state))
             
             #fill the UAVState_msg custom message
-            UAVState_msg.autopilot = autopilot #parameter
-            UAVState_msg.mission_state = mission_state#published by the agent state machine
-            if UAVState_msg.autopilot=="px4":
-                UAVState_msg.wp_reached = wp_reached #published by the agent state machine
-                UAVState_msg.extended_state = extended_state #published by the agent state machine
-            else:
-                UAVState_msg.wp_reached = 0
-                #UAVState_msg.extended_state = 0
+            # UAVState_msg.autopilot = autopilot #parameter
+            # UAVState_msg.mission_state = mission_state#published by the agent state machine
+            # if UAVState_msg.autopilot=="px4":
+            #     UAVState_msg.wp_reached = wp_reached #published by the agent state machine
+            #     UAVState_msg.extended_state = extended_state #published by the agent state machine
+            # else:
+            #     UAVState_msg.wp_reached = 0
+            # #     #UAVState_msg.extended_state = 0
+            # UAVState_msg.wp_reached = 0
+            # UAVState_msg.extended_state.vtol = 
 
             #publish the UAVState_msg custom message
             UAVState_pub.publish(UAVState_msg) 
