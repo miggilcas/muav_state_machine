@@ -33,13 +33,12 @@ class UavState(smach.State):
         UAVState_pub = rospy.Publisher("/muav_sm/uav_{}/UAVState".format(self.uav_id), UAVState, queue_size=10)
         rospy.loginfo('[UavState] - UAV{} state'.format(self.uav_id))
         rate = rospy.Rate(10) # 10hz
-        
+        UAVState_msg = UAVState()
         #subscribers initialization
         autopilot_sub = rospy.Subscriber("/uav_{}_sm/com/autopilot".format(self.uav_id), String, autopilot_cb)
         mission_state_sub = rospy.Subscriber("/uav_{}_sm/com/mission_state".format(self.uav_id), String, mission_state_cb)
         wp_reached_sub = rospy.Subscriber("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8, wp_reached_cb)
         extended_state_sub = rospy.Subscriber("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState, estate_cb)
-        
         # transition to X state
         while not rospy.is_shutdown():           
             # TBD: error detection if not namespaces with the name of the uav_id 
