@@ -29,5 +29,5 @@ class Idle(smach.State):
                 rospy.loginfo(CBLUE2 +'There are %d connections to the topic of DJI'+CEND, self.pub.get_num_connections())
             if self.pub.get_num_connections() > 1:
                 return 'gcs_connection'
-            rospy.sleep(2)
+            rospy.sleep(0.1)
         return 'shutdown'

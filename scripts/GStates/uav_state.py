@@ -10,22 +10,25 @@ from mavros_msgs.msg import ExtendedState
 from muav_state_machine.msg import UAVState
 
 # global variables to catch the data from the agent state machine node
-autopilot = String() 
-mission_state = String()
-wp_reached = UInt8()
-extended_state = ExtendedState()
+# mission_state = String()
+# wp_reached = UInt8()
+# extended_state = ExtendedState()
 
 #callback functions
 def autopilot_cb(msg):
+    global autopilot 
     autopilot = msg
 
 def mission_state_cb(msg):
+    global mission_state
     mission_state = msg
 
 def wp_reached_cb(msg):
+    global wp_reached
     wp_reached = msg
 
 def estate_cb(msg):
+    global extended_state
     extended_state = msg
 
 class UavState(smach.State):

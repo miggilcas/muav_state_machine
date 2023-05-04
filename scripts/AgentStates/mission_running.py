@@ -6,17 +6,21 @@ from mavros_msgs.msg import State, WaypointReached, WaypointList, ExtendedState
 from std_msgs.msg import UInt8
 from PrintColours import *
 
+# global variables for communication
+
+
 # callback functions to monitor the topics
 def wp_reached_cb(msg):
-    #rospy.loginfo(CGREEN+"waypoint reached: {}".format(msg.wp_seq)+CEND)
-    return msg
+    global wp_reached
+    wp_reached = msg
+
 def wp_list_cb(msg):
-    #rospy.loginfo(CYELLOW+"current wp:{} waypoint list: {}".format(msg.current_seq,msg.waypoints)+CEND)
-    return msg
+    global wp_list
+    wp_list = msg
 
 def extended_state_cb(msg):
-    #rospy.loginfo(CVIOLET+"vtol state: {}, landed state: {}".format(msg.vtol_state,msg.landed_state)+CEND)
-    return msg
+    global extended_state
+    extended_state = msg
 
 
 
@@ -43,11 +47,11 @@ class MissionRunning(smach.State):
             if self.autopilot == "px4":
                 
                 # user data
-                ud.waypoint_reached = wp_reached_cb#rospy.wait_for_message("/uav_{}/mavros/mission/reached".format(self.uav_id), WaypointReached)
-                ud.waypoints = wp_list_cb#rospy.wait_for_message("/uav_{}/mavros/mission/waypoints".format(self.uav_id), WaypointList)
+                ud.waypoint_reached = wp_reached
+                ud.waypoints = wp_list
                 # ud.vtol_state = extended_state_cb.vtol_state
                 # ud.landed_state = extended_state_cb.landed_state
-                ud.extended_state = extended_state_cb
+                ud.extended_state = extended_state
                 state_msg = rospy.wait_for_message("/uav_{}/mavros/state".format(self.uav_id), State)
                 
                 # publishing for monitor from GS
