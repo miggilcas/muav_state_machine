@@ -76,8 +76,8 @@ class UavState(smach.State):
             
 
             #finish this state:
-            if UAVState_msg.mission_state == "idle":
-                return 'mission_finished'
+            # if UAVState_msg.mission_state == "idle":
+            #     return 'mission_finished'
             
             rate.sleep()
         return 'shutdown'
