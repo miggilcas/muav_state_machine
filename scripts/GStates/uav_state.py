@@ -9,6 +9,19 @@ from mavros_msgs.msg import ExtendedState
 # import custom message:
 from muav_state_machine.msg import UAVState
 
+def autopilot_cb(msg):
+    #rospy.loginfo(CGREEN+"waypoint reached: {}".format(msg.wp_seq)+CEND)
+    return msg
+def mission_state_cb(msg):
+    #rospy.loginfo(CGREEN+"waypoint reached: {}".format(msg.wp_seq)+CEND)
+    return msg
+def wp_reached_cb(msg):
+    #rospy.loginfo(CGREEN+"waypoint reached: {}".format(msg.wp_seq)+CEND)
+    return msg
+def estate_cb(msg):
+    #rospy.loginfo(CGREEN+"waypoint reached: {}".format(msg.wp_seq)+CEND)
+    return msg
+
 class UavState(smach.State):
     def __init__(self,uav_id):#modify, common_data
         smach.State.__init__(
@@ -20,18 +33,23 @@ class UavState(smach.State):
         UAVState_pub = rospy.Publisher("/muav_sm/uav_{}/UAVState".format(self.uav_id), UAVState, queue_size=10)
         rospy.loginfo('[UavState] - UAV{} state'.format(self.uav_id))
         rate = rospy.Rate(10) # 10hz
+        
+        #subscribers initialization
+        autopilot_sub = rospy.Subscriber("/uav_{}_sm/com/autopilot".format(self.uav_id), String, autopilot_cb)
+        mission_state_sub = rospy.Subscriber("/uav_{}_sm/com/mission_state".format(self.uav_id), String, mission_state_cb)
+        wp_reached_sub = rospy.Subscriber("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8, wp_reached_cb)
+        extended_state_sub = rospy.Subscriber("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState, estate_cb)
+        
         # transition to X state
         while not rospy.is_shutdown():           
             # TBD: error detection if not namespaces with the name of the uav_id 
-            # catching the parameters from the agent state machine node
-            #autopilot = rospy.get_param("/uav_{}_sm/autopilot".format(self.uav_id)) # it doesn't work because it cannot be seen by multimaster
-            #mission_state = rospy.get_param("/uav_{}_sm/mission_state".format(self.uav_id))
-            autopilot = rospy.wait_for_message("/uav_{}_sm/com/autopilot".format(self.uav_id), String) #parameter
-            mission_state = rospy.wait_for_message("/uav_{}_sm/com/mission_state".format(self.uav_id), String) #published by the agent state machine
+            # catching the data from the agent state machine node
+            autopilot = autopilot_cb
+            mission_state = mission_state_cb
             # catching the data from the agent state machine node
             #mission_state = rospy.wait_for_message("/uav_{}_sm/com/mission_state".format(self.uav_id), String)
-            wp_reached = rospy.wait_for_message("/uav_{}_sm/com/wp_reached".format(self.uav_id), UInt8)
-            extended_state = rospy.wait_for_message("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState)
+            wp_reached = wp_reached_cb
+            extended_state = estate_cb
 
             rospy.loginfo('[UavState] - UAV{} state: autopilot: {}, mission_state: {}, wp_reached: {}, extended_state: {}'.format(self.uav_id,autopilot,mission_state,wp_reached,extended_state))
             
