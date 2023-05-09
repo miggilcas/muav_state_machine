@@ -12,24 +12,24 @@ from muav_state_machine.msg import UAVState
 # global variables to catch the data from the agent state machine node
 airframe_type = ""
 mission_state = ""
-wp_reached = UInt8()
+wp_reached = 0
 extended_state = ExtendedState()
-uav_state = UInt8()
-landed_state = UInt8()
-flight_status_dji = UInt8()
+uav_state = 0
+landed_state = 0
+flight_status_dji = 0
 
 #callback functions
 def airframe_type_cb(msg):
     global airframe_type 
-    airframe_type = msg
+    airframe_type = msg.data
 
 def mission_state_cb(msg):
     global mission_state
-    mission_state = msg
+    mission_state = msg.data
 
 def wp_reached_cb(msg):
     global wp_reached
-    wp_reached = msg
+    wp_reached = msg.data
 
 def estate_cb(msg):
     global extended_state
@@ -37,7 +37,7 @@ def estate_cb(msg):
 
 def flight_status_dji_cb(msg):
     global flight_status_dji
-    flight_status_dji = msg
+    flight_status_dji = msg.data
     
 class UavState(smach.State):
     def __init__(self,uav_id):#modify, common_data
