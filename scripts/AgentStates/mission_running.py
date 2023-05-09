@@ -3,7 +3,7 @@
 import rospy
 import smach
 from mavros_msgs.msg import State, WaypointReached, WaypointList, ExtendedState
-from std_msgs.msg import UInt8
+from std_msgs.msg import UInt8,String
 from PrintColours import *
 
 # global variables for communication
@@ -33,17 +33,30 @@ class MissionRunning(smach.State):
 
     def execute(self, ud):
         rospy.loginfo('[MissionRunning] - Mission_running state')
-        rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionRunning")
+        #rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionRunning") changed 
         # Monitor subscribers
         wp_reached_sub = rospy.Subscriber("/uav_{}/mavros/mission/reached".format(self.uav_id), WaypointReached, wp_reached_cb)
         wp_list_sub = rospy.Subscriber("/uav_{}/mavros/mission/waypoints".format(self.uav_id), WaypointList, wp_list_cb)
         extended_state_sub = rospy.Subscriber("/uav_{}/mavros/extended_state".format(self.uav_id), ExtendedState, extended_state_cb)
 
         #Monitor publishers
-        wp_reached_pub = rospy.Publisher("/uav_{}/mavros/mission/reached".format(self.uav_id), WaypointReached, queue_size=10)
-        extended_state_pub = rospy.Publisher("/uav_{}/mavros/extended_state".format(self.uav_id), ExtendedState, queue_size=10)
+        airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
+        mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(self.uav_id), String, queue_size=10)
+        
+        if self.autopilot == "px4":
+            airframe = self.autopilot + "/vtol"
+        if self.autopilot == "dji":
+            airframe = self.autopilot + "/M210"
+        
+        wp_reached_pub = rospy.Publisher("/uav_{}_sm/com/wp_reached".format(self.uav_id), WaypointReached, queue_size=10)
+        if self.autopilot == "px4":
+            extended_state_pub = rospy.Publisher("/uav_{}_sm/com/extended_state".format(self.uav_id), ExtendedState, queue_size=10)
+        if self.autopilot == "dji":
+            flight_status_dji_pub = rospy.Publisher("/uav_{}_sm/com/flight_status_dji".format(self.uav_id), UInt8, queue_size=10)
         # Transition to finish the mission
         while not rospy.is_shutdown():
+            airframe_pub.publish(airframe)
+            mission_state_pub.publish("Mission running")
             if self.autopilot == "px4":
                 
                 # user data
@@ -70,6 +83,7 @@ class MissionRunning(smach.State):
                     #return 'idle'
             elif self.autopilot == "dji":
                 state_msg = rospy.wait_for_message("/uav_{}/dji_osdk_ros/flight_status".format(self.uav_id), UInt8)
+                flight_status_dji_pub.publish(state_msg)
                 if state_msg.data == 0: # Landed
                     rospy.loginfo(CBLUE+"Vehicle with DJI landing, MISSION FINISHED"+CEND)
                     return 'idle'

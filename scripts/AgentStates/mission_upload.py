@@ -4,7 +4,7 @@ import rospy
 import smach
 #from aerialcore_common.srv import ConfigMission, ConfigMissionResponse
 from mavros_msgs.msg import State
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool,String
 from PrintColours import *
 
 # def mission_callback(req):
@@ -22,9 +22,21 @@ class MissionUpload(smach.State):
 
     def execute(self, ud):
         rospy.loginfo('[MissionUpload] - MissionUpload state')
-        rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionUpload")
+        # rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionUpload") changed
+        airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
+        
+        mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(self.uav_id), String, queue_size=10)
+        if self.autopilot == "px4":
+            airframe = self.autopilot + "/vtol"
+        if self.autopilot == "dji":
+            airframe = self.autopilot + "/M210"
+
         # transition to gcs_connection state
         while not rospy.is_shutdown():
+            #publishers publishing
+            airframe_pub.publish(airframe)
+            mission_state_pub.publish("Mission Upload")
+            
             if self.autopilot == "px4":    
                 state_msg = rospy.wait_for_message("/uav_{}/mavros/state".format(self.uav_id), State)  # Modify
                 if state_msg.mode == "AUTO.MISSION":

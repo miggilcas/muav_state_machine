@@ -3,7 +3,7 @@
 import rospy
 import smach
 from mavros_msgs.msg import State
-from std_msgs.msg import UInt8
+from std_msgs.msg import UInt8,String
 from PrintColours import *
 
 
@@ -16,9 +16,19 @@ class MissionCommanded(smach.State):
 
     def execute(self, ud):
         rospy.loginfo('[MissionCommanded] - MissionCommanded state')
-        rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionCommanded")
+        #rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionCommanded") changed
+        airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
+        
+        mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(self.uav_id), String, queue_size=10)
+        if self.autopilot == "px4":
+            airframe = self.autopilot + "/vtol"
+        if self.autopilot == "dji":
+            airframe = self.autopilot + "/M210"
         # transition to mission_running state
         while not rospy.is_shutdown():
+            airframe_pub.publish(airframe)
+            mission_state_pub.publish("Mission commanded")
+
             if self.autopilot == "px4":
                 state_msg = rospy.wait_for_message("/uav_{}/mavros/state".format(self.uav_id), State)
                 if state_msg.armed:

@@ -3,7 +3,7 @@
 import rospy
 import smach
 from mavros_msgs.msg import WaypointList
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool,String
 from PrintColours import *
 #from aerialcore_common.srv import ConfigMission, ConfigMissionResponse
 
@@ -23,10 +23,19 @@ class GCSConnection(smach.State):
 
     def execute(self, ud):
         rospy.loginfo('[GCSconnection] - GCSconnection state')
-        rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"GCSconnection")
+        #rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"GCSconnection") changed
+        airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
         
+        mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(self.uav_id), String, queue_size=10)
+        if self.autopilot == "px4":
+            airframe = self.autopilot + "/vtol"
+        if self.autopilot == "dji":
+            airframe = self.autopilot + "/M210"
+
         # transition to gcs_connection state
         while not rospy.is_shutdown():
+            airframe_pub.publish(airframe)
+            mission_state_pub.publish("uav_{} connected to the GCS".format(self.uav_id))
             if self.autopilot == "px4":
                 waypointList_msg = rospy.wait_for_message("/uav_{}/mavros/mission/waypoints".format(self.uav_id), WaypointList)# modify
                 rospy.loginfo(CBLUE+"There are %d waypoints in the mission"+CEND, len(waypointList_msg.waypoints))
