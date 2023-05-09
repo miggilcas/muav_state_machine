@@ -78,11 +78,11 @@ class UavState(smach.State):
             UAVState_msg.mission_state = mission_state#published by the agent state machine
             if airframe_type=="px4/vtol" and mission_state=="mission_running":
                 UAVState_msg.wp_reached = wp_reached #published by the agent state machine
-                UAVState_msg.extended_state = extended_state.vtol_state #published by the agent state machine
-                UAVState_msg.landed = extended_state.landed_state
+                UAVState_msg.uav_state = extended_state.vtol_state #published by the agent state machine
+                UAVState_msg.landed_state = extended_state.landed_state
             else:
                 UAVState_msg.wp_reached = 0 #TBD: create a function to do it in the DJI
-                UAVState_msg.uav_sate = 0 
+                UAVState_msg.uav_state = 0 
                 UAVState_msg.landed_state = 0 # modified with dji data
                 if airframe_type=="dji/M210" and mission_state=="mission_running":
                     UAVState_msg.landed_state = flight_status_dji #published by the agent state machine
