@@ -10,8 +10,8 @@ from mavros_msgs.msg import ExtendedState
 from muav_state_machine.msg import UAVState
 
 # global variables to catch the data from the agent state machine node
-airframe_type = String()
-mission_state = String()
+airframe_type = ""
+mission_state = ""
 wp_reached = UInt8()
 extended_state = ExtendedState()
 uav_state = UInt8()
