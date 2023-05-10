@@ -37,8 +37,15 @@ class GSStateMachine:
         
         
         
-        
-            
+        # testing creation of concurrence states dinamically
+        param_names = rospy.get_param_names()
+        uav_namespaces = set([name.split('/')[1] for name in param_names if name.startswith('/uav_')]) # get the namespaces of all the uavs
+        ids = [id.split('_')[1] for id in uav_namespaces  if id.split('_')[1].isdigit()] # create a list with the ids of the uavs for creating the concurrence states
+
+        rospy.loginfo("[GS_sm_node]  uav_namespaces: {}".format(uav_namespaces))
+        rospy.loginfo("[GS_sm_node]  uav_ids: {}".format(ids))
+
+         
         # Open the container
         with self.sm:
             # smach.StateMachine.add('IDLE', 
@@ -59,8 +66,8 @@ class GSStateMachine:
 
             # Open the container
             with self.sm_uavs:
-                for i in range (1,n_uavs):
-                    
+                #for i in range (1,n_uavs):
+                for i in ids:    
                     smach.Concurrence.add('UAV{}_STATE'.format(i), UavState(i))
             
             smach.StateMachine.add('CON', self.sm_uavs,
