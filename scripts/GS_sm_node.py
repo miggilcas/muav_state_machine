@@ -38,7 +38,7 @@ class GSStateMachine:
         
         
         # testing creation of concurrence states dinamically
-        param_names = rospy.get_param_names()
+        param_names = rospy.get_node_names()#get_param_names() # getting the parameters names is not posible with multiple masters
         uav_namespaces = set([name.split('/')[1] for name in param_names if name.startswith('/uav_')]) # get the namespaces of all the uavs
         ids = [id.split('_')[1] for id in uav_namespaces  if id.split('_')[1].isdigit()] # create a list with the ids of the uavs for creating the concurrence states
 
