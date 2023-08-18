@@ -1,15 +1,15 @@
 <launch>
 
-    <arg name="uav_id" default="1"/>
+    <arg name="uav_id" default="3"/>
     <arg name="autopilot" default="px4"/>
 
-    <node name="agent_sm_node" output="screen" pkg="muav_state_machine" type="agent_sm_node.py" >
-        <param name="uav_id" value="$(arg uav_id)" />
-        <param name="autopilot" value="$(arg autopilot)" />
-    
-    
-    </node>
-    
-    
+
+    <group ns="uav_$(arg uav_id)">
+       <node name="agent_sm_node" output="screen" pkg="muav_state_machine" type="agent_sm_node.py" >
+		<param name="uav_id" value="$(arg uav_id)" />
+		<param name="autopilot" value="$(arg autopilot)" />
+	
+       </node>
+    </group>
 
 </launch>

@@ -13,7 +13,7 @@ class Idle(smach.State):
         self.autopilot = autopilot
         self.uav_id = uav_id
 
-    def execute(self, userdata):
+    def execute(self, ud):
         rospy.loginfo('[Idle] - Idle state')
         airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
         

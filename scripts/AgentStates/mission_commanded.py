@@ -14,9 +14,8 @@ class MissionCommanded(smach.State):
         self.autopilot = autopilot
         self.uav_id = uav_id
 
-    def execute(self, ud):
+    def execute(self, userdata):
         rospy.loginfo('[MissionCommanded] - MissionCommanded state')
-        #rospy.set_param("/uav_{}_sm/autopilot".format(self.uav_id),"MissionCommanded") changed
         airframe_pub = rospy.Publisher("/uav_{}_sm/com/airframe_type".format(self.uav_id), String, queue_size=10)
         
         mission_state_pub = rospy.Publisher("/uav_{}_sm/com/mission_state".format(self.uav_id), String, queue_size=10)
@@ -42,9 +41,6 @@ class MissionCommanded(smach.State):
                 if state_msg.data == 2: # In flight
                     rospy.loginfo(CBLUE+"Vehicle DJI in mission, Mission started"+CEND)
                     return 'mission_running'
-            # if (True):# Modify
-            #     rospy.sleep(14)
-            #     return 'mission_running'
             
             
         return 'shutdown'

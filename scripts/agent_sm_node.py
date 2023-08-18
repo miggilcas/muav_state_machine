@@ -12,12 +12,14 @@ from AgentStates.gcs_connection import GCSConnection
 from AgentStates.mission_upload import MissionUpload
 from AgentStates.mission_commanded import MissionCommanded
 from AgentStates.mission_running import MissionRunning
+from AgentStates.rth import ReturnToHome
 
 
 from mavros_msgs.msg import State
 from mavros_msgs.srv import WaypointClear,WaypointClearRequest
 
 from sensor_msgs.msg import BatteryState
+from sensor_msgs.msg import NavSatFix
 from PrintColours import *
 
 
@@ -28,43 +30,30 @@ class MUAVStateMachine:
         logger = logging.getLogger("rosout")
         logger.setLevel(logging.INFO)
         #Getting parameters
-        uav_id = rospy.get_param("/agent_sm_node/uav_id")
-        autopilot = rospy.get_param("/agent_sm_node/autopilot")
+        uav_id_search = rospy.search_param('uav_id')
+        autopilot_search = rospy.search_param('autopilot')
 
-        #Setting the parameters for eassy access to GS_sm_node
-        #rospy.set_param("/uav_{}_sm/autopilot".format(uav_id),autopilot)
-        #rospy.set_param("/uav_{}_sm/mission_state".format(uav_id),"idle")
-        
-
-        #MonitorMavrosState_topic_cb = lambda ud, msg: msg.armed  # callback function to monitor the topic '/mavros/state'
-        # def MonitorMavrosState_topic_cb(ud, msg):
-        #     ud.armed = msg.armed
-        #     rospy.sleep(1.0)  # actualizar cada 1 segundo
-
-        # MonitorMavrosState_cb = smach_ros.MonitorState('/uav_2/mavros/state', State, MonitorMavrosState_topic_cb, output_keys=['armed'])  # creating a MonitorState object
-
-        #sm_data = AmuledStateMachineData()
-        #states = sm_data.states
+        uav_id = rospy.get_param(uav_id_search)
+        autopilot = rospy.get_param(autopilot_search)
         
         # Create a SMACH state machine
         self.sm = smach.StateMachine(outcomes=['shutdown'])
-        # def state_callback(state_msg):
-        #     if state_msg.armed:
-        #         rospy.loginfo("Vehicle armed")
-        #     else:
-        #         rospy.loginfo("Vehicle disarmed")
+        # we define the user data
+        self.sm.userdata.wp_reached = 0
+        self.sm.userdata.wp_list = []
+        self.sm.userdata.ext_state = 0
         
 
         # In order to know how many connections are active we create a publisher
         if autopilot=="px4":
-            pub = rospy.Publisher("/uav_{}/mavros/battery".format(uav_id), BatteryState, queue_size=10)
+            #pub = rospy.Publisher("/uav_{}/mavros/battery".format(uav_id), BatteryState, queue_size=10)
+            pub = rospy.Publisher("/uav_{}/mavros/global_position/global".format(uav_id), NavSatFix, queue_size=10)
+            
         elif autopilot=="dji":
             pub = rospy.Publisher("/uav_{}/dji_osdk_ros/battery_state".format(uav_id), BatteryState, queue_size=10)
         else:
             pass
-            #pub = rospy.Publisher("/uav_{}/mavros/battery".format(uav_id), BatteryState, queue_size=10)    
-        # create a subscriber to the mavros/state topic
-        #sub = rospy.Subscriber("/uav_2/mavros/state", State, state_callback)
+            
         # Open the container
         with self.sm:
             # # Add states to the container
@@ -84,17 +73,43 @@ class MUAVStateMachine:
             smach.StateMachine.add('MISSIONRUNNING', MissionRunning(autopilot,uav_id),
                     transitions={'idle' : 'IDLE',
                                  'clear_mission' : 'CLEARMISSION',
-                                 'shutdown'  : 'shutdown'})
+                                 'rth' : 'RTH',
+                                 'shutdown'  : 'shutdown'},
+                    remapping={'mission_wp_r' : 'wp_reached',
+                               'mission_wp_l' : 'wp_list',
+                               'mission_ext_state':'ext_state',
+                               'mission_wp_r_' : 'wp_reached',
+                               'mission_wp_l_' : 'wp_list',
+                               'mission_ext_state_':'ext_state'})
             
             ## Concurrence State machine that will be monitoring the mission state
 
-            # pruebas
+            # Tests
+            ## Will be the CANCEL State for PX4 or mavros aircrafts
             smach.StateMachine.add('CLEARMISSION', 
                                    smach_ros.ServiceState('/uav_{}/mavros/mission/clear'.format(uav_id), WaypointClear,
                                 request = WaypointClearRequest()),
                     transitions={'succeeded':'IDLE',
                                  'aborted':'IDLE',
                                  'preempted':'IDLE'})
+            
+            # Emergencies
+
+            ## RTH State
+            smach.StateMachine.add('RTH', ReturnToHome(autopilot,uav_id),
+                    transitions={'idle' : 'IDLE',
+                                 #'resume': 'RESUME',
+                                 'clear_mission' : 'CLEARMISSION',
+                                 'shutdown'  : 'shutdown'},
+                    remapping={'rth_wp_r' : 'wp_reached',
+                               'rth_wp_l' : 'wp_list',
+                               'rth_ext_state':'ext_state',
+                               'rth_wp_r_' : 'wp_reached',
+                               'rth_wp_l_' : 'wp_list',
+                               'rth_ext_state_':'ext_state'})
+            ## STOP State
+
+            ## RESUME State
            
             
 
